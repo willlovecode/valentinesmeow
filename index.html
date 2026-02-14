@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Für dich ❤️</title>
+    <!-- Google Fonts für den süßen Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #880e4f; /* Sexy Bordeaux */
+            --secondary: #d81b60;
+            --bg: #fce4ec; /* Zartes Rosé */
+            --text: #2c0e18; /* Elegantes Dunkel */
+            --white: #ffffff; 
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg);
+            /* Dezentere Hintergrundfarbe */
+            font-family: 'Lato', sans-serif;
+            overflow: hidden; /* Verhindert Scrollbars wenn der Button sich bewegt */
+        }
+
+        .container {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(136, 14, 79, 0.15);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            position: relative;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--text);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            color: var(--text);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            position: relative; /* Wichtig für absolute Positionierung des Nein-Buttons */
+            min-height: 60px;
+        }
+
+        .gif-container {
+            margin: 10px 0;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .btn-yes {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(136, 14, 79, 0.3);
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.05);
+            background-color: var(--secondary);
+        }
+
+        .btn-no {
+            background-color: #e0e0e0;
+            color: #555;
+            position: relative; /* Startet normal im Layout */
+            transition: all 0.4s ease; /* Weiches Wegrennen */
+        }
+
+        /* Kalender Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .date-bubble {
+            background: var(--bg);
+            border: 2px solid var(--secondary);
+            border-radius: 15px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .date-bubble:hover, .date-bubble.selected {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animationen */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Hintergrund Animation */
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1; /* Hinter dem Container (z-index 10) */
+            overflow: hidden;
+        }
+        .floater {
+            position: absolute;
+            bottom: -100px;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Volume Control */
+        .volume-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        input[type=range] {
+            accent-color: var(--primary);
+            cursor: pointer;
+            width: 100px;
+        }
+
+        /* Start Screen (Vorhang) */
+        #screen-start {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1); /* Eleganter Schwung */
+        }
+        
+        #screen-start.slide-up {
+            transform: translateY(-100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="screen-start">
+        <h1 style="color: white;">Für dich ❤️</h1>
+        <button class="btn-yes" style="background-color: white; color: var(--primary); font-size: 1.3rem;" onclick="startExperience()">Klick mich</button>
+    </div>
+
+    <!-- Hintergrund Elemente -->
+    <div id="floating-bg" class="floating-bg"></div>
+
+    <!-- Volume Control -->
+    <div class="volume-container">
+        <span style="font-size: 1.2rem;">🎵</span>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+    </div>
+
+    <!-- Musik Player (Datei music.mp3 muss im Ordner liegen) -->
+    <audio id="bgMusic" loop>
+        <source src="ophelia.mp3" type="audio/mp3">
+    </audio>
+
+    <!-- SCREEN 1: Die Frage -->
+    <div id="screen-question" class="container animate-pop">
+        <h1>Willst du meine Valentinsmietze sein?</h1>
+        <div class="gif-container">
+            <img id="question-img" src="https://media.tenor.com/N2o4wXkQj44AAAAj/cute-please.gif" alt="Bild 1" style="width: 100%; max-width: 200px; border-radius: 15px;">
+        </div>
+                <p>(bitti bitti)</p>
+
+        <div class="btn-group">
+            <button class="btn-yes" id="yesBtn" onclick="handleYes()">Jaaaa! ❤️</button>
+            <div id="noBtnWrapper">
+                <button class="btn-no" id="noBtn">Nein</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: Der Planer -->
+    <div id="screen-planner" class="container hidden">
+        <img id="planner-gif" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDc0YnY1M3NucTVxNjZ2OXVkMjk2MGExeXJrcHIzcGg1bHY4M3ZidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uXZOSmv0glEDpG26VC/giphy.gif
+" alt="Happy Bear" style="width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 1rem;">
+        <p id="planner-text">Wann hast du Zeit für unser Date?</p>
+        <div id="calendar" class="calendar-grid">
+            <!-- Termine werden hier per JS eingefügt -->
+        </div>
+        <div id="loading-text" class="hidden" style="margin-top:15px;">
+            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGd0czRreW96Y3d5aTl4Nzd2MHI3eTNtdjkyb3hxMm01Z3QxMjcxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7NoNw4pMNTvgc/giphy.gif" alt="Loading" style="width: 100%; max-width: 250px; height: auto;">
+            <p style="font-size: 0.8rem; margin: 5px 0 0 0;">Sende...</p>
+        </div>
+    </div>
+    <!-- SCREEN 3: Bestätigung -->
+    <div id="screen-success" class="container hidden">
+        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcThxbThmaHFsOG01N3U0anVkdDc3eWkyOTN1MWN1dWx2bmFuZ2ttcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/W8hVGGjOjV82Rh6Oyi/giphy.gif" alt="Celebration Bear" style="width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 1rem;">
+        <h1>Purrrfekt! 💌</h1>
+        <p>Ich freu mich <3 </p>
+    </div>
+
+    <script>
+        // --- KONFIGURATION ---
+        // Hier musst du deine EmailJS Daten eintragen (Anleitung unten)
+        const EMAILJS_PUBLIC_KEY = "zqL6M70LtC7byP76A";
+        const EMAILJS_SERVICE_ID = "service_0l6vj2o";
+        const EMAILJS_TEMPLATE_ID = "template_uuprhkh";
+
+        (function(){
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+        })();
+
+        // --- HINTERGRUND & MUSIK ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Hintergrund Elemente erstellen
+            const bgContainer = document.getElementById('floating-bg');
+            const emojis = ['🐱', '🐾', '❤️', '😻', '💖', '🐾'];
+            
+            for (let i = 0; i < 20; i++) {
+                const el = document.createElement('div');
+                el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                el.className = 'floater';
+                
+                // Zufällige Positionen und Geschwindigkeiten
+                el.style.left = Math.random() * 100 + '%';
+                el.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                el.style.animationDelay = (Math.random() * -20) + 's'; /* Startet sofort */
+                
+                bgContainer.appendChild(el);
+            }
+        });
+
+        // --- VOLUME CONTROL ---
+        const volumeSlider = document.getElementById('volumeSlider');
+        volumeSlider.addEventListener('input', (e) => {
+            const audio = document.getElementById('bgMusic');
+            audio.volume = e.target.value;
+            // Falls Musik noch nicht läuft (wegen Autoplay-Block), könnte man sie hier starten, 
+            // aber wir lassen das beim globalen Klick-Handler.
+        });
+
+        // --- START EXPERIENCE ---
+        function startExperience() {
+            const audio = document.getElementById('bgMusic');
+            audio.play().catch(e => console.log("Audio play failed", e));
+            document.getElementById('screen-start').classList.add('slide-up');
+        }
+
+        // --- NEIN BUTTON LOGIK ---
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtnWrapper = document.getElementById('noBtnWrapper');
+        let noBtnScale = 1;
+        let yesBtnScale = 1;
+        
+        // Texte für den Nein-Button
+        const noTexts = ["Nein", "Sicher?", "Wirklich?", "Denk nach!", "Geht nicht!", "Bitteee!", "Komm schon!", "Versuch's!", "Falsch!", "Nö!", "Doch Ja?", "Ups!"];
+        // Texte für den Ja-Button
+        const yesTexts = ["Jaaaa! ❤️", "Bitte! 🥺", "Unbedingt!", "Trau dich!", "Klick mich!", "YESSS!", "Auf jeden Fall!", "Komm schon!"];
+        let attemptCount = 0;
+        
+        function moveButton() {
+            // Text ändern
+            noBtn.innerText = noTexts[Math.floor(Math.random() * noTexts.length)];
+            yesBtn.innerText = yesTexts[Math.floor(Math.random() * yesTexts.length)];
+            
+            attemptCount++;
+            if (attemptCount === 5) {
+                document.getElementById('question-img').src = "https://media.tenor.com/7zK3CGn4sW8AAAAC/cat-pleading.gif"; // Anderes Bild nach 5 Versuchen
+            }
+
+            // Fenstergröße holen
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40);
+
+            // Button-Größen anpassen
+            noBtnScale *= 0.9; // "Nein" wird kleiner
+            yesBtnScale += 0.15; // "Ja" wird größer
+            noBtn.style.transform = `scale(${noBtnScale})`;
+            yesBtn.style.transform = `scale(${yesBtnScale})`;
+            
+            // Beim ersten Mal: Platzhalter-Größe fixieren, damit Layout nicht springt
+            if (noBtn.style.position !== 'fixed') {
+                const rect = noBtn.getBoundingClientRect();
+                
+                noBtnWrapper.style.width = noBtn.offsetWidth + 'px';
+                noBtnWrapper.style.height = noBtn.offsetHeight + 'px';
+                
+                // Startposition exakt setzen, damit es nicht springt
+                noBtn.style.left = rect.left + 'px';
+                noBtn.style.top = rect.top + 'px';
+                noBtn.style.position = 'fixed'; // Wechsel zu fixed für den ganzen Screen
+                
+                // Kurze Verzögerung, damit der Browser die Startposition registriert und die Animation smooth startet
+                setTimeout(() => {
+                    noBtn.style.left = `${x}px`;
+                    noBtn.style.top = `${y}px`;
+                }, 50);
+            } else {
+                noBtn.style.left = `${x}px`;
+                noBtn.style.top = `${y}px`;
+            }
+        }
+
+        // Desktop: Maus bewegt sich drüber
+        noBtn.addEventListener('mouseover', moveButton);
+        // Mobile: Touch (bevor geklickt wird)
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Verhindert den Klick
+            moveButton();
+        });
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+
+        // --- JA BUTTON LOGIK ---
+        function handleYes() {
+            // Konfetti Explosion
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#880e4f', '#d81b60', '#ffffff']
+            });
+
+            // Screen wechseln
+            document.getElementById('screen-question').classList.add('hidden');
+            const planner = document.getElementById('screen-planner');
+            planner.classList.remove('hidden');
+            planner.classList.add('animate-pop');
+
+            generateCalendar();
+        }
+
+        // --- KALENDER LOGIK ---
+        function generateCalendar() {
+            const calendarDiv = document.getElementById('calendar');
+            const today = new Date();
+            const options = { weekday: 'short', day: 'numeric', month: 'numeric' };
+
+            // Nächste 15 Tage generieren
+            for (let i = 0; i < 15; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                const dateStr = date.toLocaleDateString('de-DE', options);
+                const fullDateStr = date.toLocaleDateString('de-DE'); // Für die E-Mail
+
+                const btn = document.createElement('div');
+                btn.className = 'date-bubble';
+                btn.innerText = dateStr;
+                btn.onclick = () => selectDate(fullDateStr, btn);
+                calendarDiv.appendChild(btn);
+            }
+        }
+
+        function selectDate(dateString, element) {
+            // Visuelles Feedback
+            document.querySelectorAll('.date-bubble').forEach(b => b.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            // Kalender, Text UND oberes GIF ausblenden
+            document.getElementById('calendar').classList.add('hidden');
+            document.getElementById('planner-text').classList.add('hidden');
+            document.getElementById('planner-gif').classList.add('hidden');
+
+            // E-Mail senden
+            sendEmail(dateString);
+        }
+
+        // --- EMAIL SENDEN ---
+        function sendEmail(selectedDate) {
+            const loadingText = document.getElementById('loading-text');
+            loadingText.classList.remove('hidden');
+
+            const templateParams = {
+                date: selectedDate,
+                message: "Sie hat JA gesagt! Datum wurde ausgewählt."
+            };
+
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    // 3 Sekunden warten für den Effekt
+                    setTimeout(showFinalScreen, 3000);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    if (error.status === 412) {
+                        alert('Einrichtungsfehler: Die Gmail-Verbindung in EmailJS hat keine Senderechte. Bitte im EmailJS Dashboard neu verbinden und "Senden" erlauben.');
+                    } else {
+                        // Auch bei Fehler kurz warten, damit es nicht flackert
+                        setTimeout(() => {
+                            alert('Hoppla, das Senden hat nicht geklappt. Aber das Datum ist: ' + selectedDate);
+                            showFinalScreen();
+                        }, 3000);
+                    }
+                });
+        }
+
+        function showFinalScreen() {
+            document.getElementById('screen-planner').classList.add('hidden');
+            const success = document.getElementById('screen-success');
+            success.classList.remove('hidden');
+            success.classList.add('animate-pop');
+            
+            // Noch mehr Konfetti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
