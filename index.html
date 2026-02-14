@@ -37,7 +37,7 @@
             background: var(--white);
             padding: 2rem;
             border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(136, 14, 79, 0.15);
+            box-shadow: 0 20px 40px rgba(136, 14, 79, 0.1);
             text-align: center;
             max-width: 90%;
             width: 400px;
@@ -69,9 +69,20 @@
         }
 
         .gif-container {
-            margin: 10px 0;
-            border-radius: 15px;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gif-container img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        #screen-success .gif-container img {
+            max-height: 350px; /* Größer für das End-Bild */
         }
 
         button {
@@ -231,7 +242,7 @@
     <div id="screen-question" class="container animate-pop">
         <h1>Willst du meine Valentinsmietze sein?</h1>
         <div class="gif-container">
-            <img id="question-img" src="/catask.png" alt="Bild 1" style="width: 100%; max-width: 200px; border-radius: 15px;">
+            <img id="question-img" src="catask.png" alt="Bild 1">
         </div>
                 <p>(bitti bitti)</p>
 
@@ -245,20 +256,23 @@
 
     <!-- SCREEN 2: Der Planer -->
     <div id="screen-planner" class="container hidden">
-        <img id="planner-gif" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDc0YnY1M3NucTVxNjZ2OXVkMjk2MGExeXJrcHIzcGg1bHY4M3ZidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uXZOSmv0glEDpG26VC/giphy.gif
-" alt="Happy Bear" style="width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 1rem;">
+        <div class="gif-container">
+            <img id="planner-gif" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDc0YnY1M3NucTVxNjZ2OXVkMjk2MGExeXJrcHIzcGg1bHY4M3ZidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uXZOSmv0glEDpG26VC/giphy.gif" alt="Happy Bear">
+        </div>
         <p id="planner-text">Wann hast du Zeit für unser Date?</p>
         <div id="calendar" class="calendar-grid">
             <!-- Termine werden hier per JS eingefügt -->
         </div>
         <div id="loading-text" class="hidden" style="margin-top:15px;">
-            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGd0czRreW96Y3d5aTl4Nzd2MHI3eTNtdjkyb3hxMm01Z3QxMjcxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7NoNw4pMNTvgc/giphy.gif" alt="Loading" style="width: 100%; max-width: 250px; height: auto;">
+            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGd0czRreW96Y3d5aTl4Nzd2MHI3eTNtdjkyb3hxMm01Z3QxMjcxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7NoNw4pMNTvgc/giphy.gif" alt="Loading" style="width: 100%; max-width: 250px; height: auto; border-radius: 20px;">
             <p style="font-size: 0.8rem; margin: 5px 0 0 0;">Sende...</p>
         </div>
     </div>
     <!-- SCREEN 3: Bestätigung -->
     <div id="screen-success" class="container hidden">
-        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcThxbThmaHFsOG01N3U0anVkdDc3eWkyOTN1MWN1dWx2bmFuZ2ttcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/W8hVGGjOjV82Rh6Oyi/giphy.gif" alt="Celebration Bear" style="width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 1rem;">
+        <div class="gif-container">
+            <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcThxbThmaHFsOG01N3U0anVkdDc3eWkyOTN1MWN1dWx2bmFuZ2ttcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/W8hVGGjOjV82Rh6Oyi/giphy.gif" alt="Celebration Bear">
+        </div>
         <h1>Purrrfekt! 💌</h1>
         <p>Ich freu mich <3 </p>
     </div>
@@ -319,9 +333,9 @@
         let yesBtnScale = 1;
         
         // Texte für den Nein-Button
-        const noTexts = ["Nein", "Sicher?", "Wirklich?", "Denk nach!", "Geht nicht!", "Bitteee!", "Komm schon!", "Versuch's!", "Falsch!", "Nö!", "Doch Ja?", "Ups!"];
+        const noTexts = ["Nein", "Hallo?", "Wirklich?", "Quatsch", "Geht nicht!", "Nicht klicken", "kein Button!", "Versuch's!", "Falsch!", "Nö!", "Doch Ja?", "Ups!"];
         // Texte für den Ja-Button
-        const yesTexts = ["Jaaaa! ❤️", "Bitte! 🥺", "Unbedingt!", "Trau dich!", "Klick mich!", "YESSS!", "Auf jeden Fall!", "Komm schon!"];
+        const yesTexts = ["Jaaaa! ❤️", "hier", "HIER!", "DRÜCK MICH", "HILFE", "YESSS!", "Auf jeden Fall!", "Komm schon!"];
         let attemptCount = 0;
         
         function moveButton() {
@@ -331,7 +345,7 @@
             
             attemptCount++;
             if (attemptCount === 3) {
-                document.getElementById('question-img').src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbngwdmxoaGU4MWJkdTQ3cjVtbDRtbDcwaXhyd29hcDhvZnhyc3VvNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/901mxGLGQN2PyCQpoc/giphy.gif"; // Anderes Bild nach ein paar Versuchen
+                document.getElementById('question-img').src = "CuteCat.gif"; // Pfad ohne "/" am Anfang, damit es auf GitHub Pages klappt
             }
 
             // Fenstergröße holen
@@ -447,14 +461,14 @@
             emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
-                    // 3 Sekunden warten für den Effekt
-                    setTimeout(showFinalScreen, 3000);
+                    // 1.5 Sekunden warten für den Effekt
+                    setTimeout(showFinalScreen, 1500);
                 }, function(error) {
                     console.log('FAILED...', error);
                     if (error.status === 412) {
                         alert('Einrichtungsfehler: Die Gmail-Verbindung in EmailJS hat keine Senderechte. Bitte im EmailJS Dashboard neu verbinden und "Senden" erlauben.');
                     } else {
-                        // Auch bei Fehler kurz warten, damit es nicht flackert
+                        // Auch bei Fehler kurz warten, damit es nicht flackert (1.5s)
                         setTimeout(() => {
                             alert('Hoppla, das Senden hat nicht geklappt. Aber das Datum ist: ' + selectedDate);
                             showFinalScreen();
